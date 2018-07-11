@@ -30,6 +30,15 @@ Install requirements via `pip install -r requirements.txt`. CuPy and pynvrtc nee
 
 <br>
 
+## Installation
+```
+pip install -r requirements.txt
+python setup.py build
+python setup.py develop
+```
+
+<br>
+
 ## Examples
 The usage of SRU is similar to `nn.LSTM`. SRU likely requires more stacking layers than LSTM. We recommend starting by 2 layers and use more if necessary (see our report for more experimental details).
 ```python
