@@ -13,6 +13,8 @@ from pynvrtc.compiler import Program
 from collections import namedtuple
 
 from SRU_cpu import sru_compute_cpu_cy, sru_compute_bi_cpu_cy
+# print('cupy version:', cupy.__version__)
+# print('cupy path', cupy.__path__)
 
 
 SRU_CODE = """
@@ -318,17 +320,17 @@ class SRU_Compute_GPU(Function):
 
         init_ = x.new(ncols).zero_() if init is None else init
         size = (length, batch, d*bidir) if x.dim() == 3 else (batch, d*bidir)
-        c = x.new(*size)
-        h = x.new(*size)
+        c = x.new(*size).float()
+        h = x.new(*size).float()
 
         stream, fwd_func, bifwd_func, _, _ = self.get_functions()
         FUNC = fwd_func if not self.bidirectional else bifwd_func
         FUNC(args=[
-            u.contiguous().data_ptr(),
-            x.contiguous().data_ptr() if k_ == 3 else 0,
-            bias.data_ptr(),
-            init_.contiguous().data_ptr(),
-            mask_h.data_ptr() if mask_h is not None else 0,
+            u.float().contiguous().data_ptr(),
+            x.float().contiguous().data_ptr() if k_ == 3 else 0,
+            bias.float().data_ptr(),
+            init_.float().contiguous().data_ptr(),
+            mask_h.float().data_ptr() if mask_h is not None else 0,
             length,
             batch,
             d,
@@ -339,6 +341,7 @@ class SRU_Compute_GPU(Function):
             block = (thread_per_block,1,1), grid = (num_block,1,1),
             stream=stream
         )
+        h, c = h.type_as(x), c.type_as(x)
 
         self.save_for_backward(u, x, bias, init, mask_h)
         self.intermediate = c
@@ -363,29 +366,29 @@ class SRU_Compute_GPU(Function):
         thread_per_block = min(512, ncols)
         num_block = (ncols-1)//thread_per_block+1
 
-        init_ = x.new(ncols).zero_() if init is None else init
-        grad_u = u.new(*u.size())
-        grad_bias = x.new(2, batch, d*bidir)
-        grad_init = x.new(batch, d*bidir)
+        init_ = x.new(ncols).zero_().float() if init is None else init
+        grad_u = u.new(*u.size()).float()
+        grad_bias = x.new(2, batch, d*bidir).float()
+        grad_init = x.new(batch, d*bidir).float()
 
         # For DEBUG
         #size = (length, batch, x.size(-1)) if x.dim() == 3 else (batch, x.size(-1))
         #grad_x = x.new(*x.size()) if k_ == 3 else x.new(*size).zero_()
 
         # Normal use
-        grad_x = x.new(*x.size()) if k_ == 3 else None
+        grad_x = x.new(*x.size()).float() if k_ == 3 else None
 
         stream, _, _, bwd_func, bibwd_func = self.get_functions()
         FUNC = bwd_func if not self.bidirectional else bibwd_func
         FUNC(args=[
-            u.contiguous().data_ptr(),
-            x.contiguous().data_ptr() if k_ == 3 else 0,
-            bias.data_ptr(),
-            init_.contiguous().data_ptr(),
-            mask_h.data_ptr() if mask_h is not None else 0,
-            c.data_ptr(),
-            grad_h.contiguous().data_ptr(),
-            grad_last.contiguous().data_ptr(),
+            u.float().contiguous().data_ptr(),
+            x.float().contiguous().data_ptr() if k_ == 3 else 0,
+            bias.float().data_ptr(),
+            init_.float().contiguous().data_ptr(),
+            mask_h.float().data_ptr() if mask_h is not None else 0,
+            c.float().data_ptr(),
+            grad_h.float().contiguous().data_ptr(),
+            grad_last.float().contiguous().data_ptr(),
             length,
             batch,
             d,
@@ -398,7 +401,9 @@ class SRU_Compute_GPU(Function):
             block = (thread_per_block,1,1), grid = (num_block,1,1),
             stream=stream
         )
-        return grad_u, grad_x, grad_bias.sum(1).view(-1), grad_init, None
+        if grad_x is not None:
+            grad_x = grad_x.type_as(x)
+        return grad_u.type_as(x), grad_x, grad_bias.sum(1).view(-1).type_as(x), grad_init.type_as(x), None
 
 
 def SRU_Compute_CPU(activation_type, d, bidirectional=False):
