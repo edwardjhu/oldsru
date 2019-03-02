@@ -37,6 +37,11 @@ pip install -r requirements.txt
 python setup.py build
 python setup.py develop
 ```
+or
+```
+pip install -r requirements.txt
+pip install -e .
+```
 
 <br>
 
