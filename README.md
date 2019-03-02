@@ -1,3 +1,4 @@
+# SRU (version 1) with CPU mode written in Cython
 
 ## About
 
