@@ -1,3 +1,4 @@
+# SRU (version 1) with CPU mode written in Cython
 
 ## About
 
@@ -35,6 +36,11 @@ Install requirements via `pip install -r requirements.txt`. CuPy and pynvrtc nee
 pip install -r requirements.txt
 python setup.py build
 python setup.py develop
+```
+or
+```
+pip install -r requirements.txt
+pip install -e .
 ```
 
 <br>
