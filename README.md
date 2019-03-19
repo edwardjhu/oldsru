@@ -1,5 +1,6 @@
 # SRU (version 1) with CPU mode written in Cython and old initialization
 
+
 ## About
 
 **SRU** is a recurrent unit that can run over 10 times faster than cuDNN LSTM, without loss of accuracy tested on many tasks. 
@@ -43,6 +44,7 @@ pip install -r requirements.txt
 pip install -e .
 ```
 This will install a package `oldsru` which contains two classes `oldsru.SRU` and `oldsru.SRUCell`.
+
 
 <br>
 
