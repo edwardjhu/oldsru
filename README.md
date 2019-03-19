@@ -1,4 +1,5 @@
-# SRU (version 1) with CPU mode written in Cython
+# SRU (version 1) with CPU mode written in Cython and old initialization
+
 
 ## About
 
@@ -42,6 +43,8 @@ or
 pip install -r requirements.txt
 pip install -e .
 ```
+This will install a package `oldsru` which contains two classes `oldsru.SRU` and `oldsru.SRUCell`.
+
 
 <br>
 
@@ -50,7 +53,7 @@ The usage of SRU is similar to `nn.LSTM`. SRU likely requires more stacking laye
 ```python
 import torch
 from torch.autograd import Variable
-from cuda_functional import SRU, SRUCell
+from oldsru import SRU, SRUCell
 
 # input has length 20, batch size 32 and dimension 128
 x = Variable(torch.FloatTensor(20, 32, 128).cuda())

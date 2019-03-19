@@ -5,7 +5,7 @@ import os
 import filecmp
 from Cython.Build import cythonize
 
-PACKAGE = 'sru'
+PACKAGE = 'oldsru'
 
 ################################################################################
 def readme():
@@ -18,7 +18,7 @@ def readme():
 def get_version():
     """ Gets the current version of the package.
     """
-    version_py = os.path.join(os.path.dirname(__file__), 'sru/version.py')
+    version_py = os.path.join(os.path.dirname(__file__), 'oldsru/version.py')
     with open(version_py) as fh:
         for line in fh:
             if line.startswith('__version__'):
@@ -34,14 +34,14 @@ def get_requirements():
     return [line for line in lines if line]
 
 ################################################################################
-if not os.path.isfile('sru/cuda_functional.py'):
+if not os.path.isfile('oldsru/cuda_functional.py'):
     shutil.copy('cuda_functional.py', 'sru')
     needs_delete = True
 elif not filecmp.cmp(
-        'sru/cuda_functional.py', 'cuda_functional.py', shallow=False
+        'oldsru/cuda_functional.py', 'cuda_functional.py', shallow=False
     ):
     raise ValueError('Running setup would overwrite the file '
-        '"sru/cuda_functional.py". Ensure that any changes to the file are '
+        '"oldsru/cuda_functional.py". Ensure that any changes to the file are '
         'present in "./cuda_functional.py", delete "sru/cuda_functional.py", '
         'and then try again.')
 else:
@@ -65,7 +65,7 @@ try:
         license='MIT',
 
         # What is packaged here.
-        packages=['sru'],
+        packages=['oldsru'],
 
         # What to include
         package_data={
@@ -83,6 +83,6 @@ try:
     )
 finally:
     if needs_delete:
-        os.unlink('sru/cuda_functional.py')
+        os.unlink('oldsru/cuda_functional.py')
 
 #### EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF.EOF
