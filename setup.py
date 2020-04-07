@@ -12,7 +12,7 @@ def readme():
     """ Return the README text.
     """
     with open('README.md') as fh:
-        return fh.read().decode('utf-8')
+        return 'empty'
 
 ################################################################################
 def get_version():
